@@ -1,0 +1,158 @@
+package com.Man10h.social_network_app.controller;
+
+import com.Man10h.social_network_app.model.dto.CommentDTO;
+import com.Man10h.social_network_app.model.dto.PostDTO;
+import com.Man10h.social_network_app.model.dto.PostUpdateDTO;
+import com.Man10h.social_network_app.model.dto.UserDTO;
+import com.Man10h.social_network_app.model.entity.UserEntity;
+import com.Man10h.social_network_app.model.response.CommentResponse;
+import com.Man10h.social_network_app.model.response.FollowerResponse;
+import com.Man10h.social_network_app.model.response.PostResponse;
+import com.Man10h.social_network_app.model.response.UserResponse;
+import com.Man10h.social_network_app.service.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/v1/user")
+@RequiredArgsConstructor
+@Slf4j
+@Tag(name = "API User", description = "Secured by JWT and required role USER")
+public class UserController {
+
+    private final UserService userService;
+    private final FollowerService followerService;
+    private final PostService postService;
+    private final PostLikeService postLikeService;
+    private final CommentService commentService;
+
+    @GetMapping("/profile")
+    @Operation(summary = "Get user's profile", description = "Using Bearer Token")
+    public ResponseEntity<UserResponse> getProfile(@AuthenticationPrincipal UserEntity userEntity) {
+        try{
+           return ResponseEntity.ok(userService.getProfile(userEntity.getId()));
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping(value = "/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Update user's profile", description = "Using Bearer Token, UserDTO for details and multipart file for image")
+    public ResponseEntity<Boolean> updateProfile(@ModelAttribute UserDTO userDTO,
+                                                 @Parameter(hidden = true) @AuthenticationPrincipal UserEntity userEntity,
+                                                 @RequestPart("image") MultipartFile image) {
+        try{
+            return ResponseEntity.ok(userService.updateProfile(userEntity.getId(), userDTO, image));
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+
+
+    @GetMapping("/follower-posts")
+    @Operation(summary = "Get a page of follower's post", description = "Using Bearer Token, pageNumber, size(10)")
+    public ResponseEntity<Page<PostResponse>> getPosts(@AuthenticationPrincipal UserEntity userEntity,
+                                                       @RequestParam(name = "page") int page,
+                                                       @RequestParam(name = "size") int size){
+        return ResponseEntity.ok(postService.getFollowerPosts(userEntity.getId(), PageRequest.of(page, size)));
+    }
+
+    @GetMapping("/user-posts")
+    @Operation(summary = "Get a page of user's post", description = "Using Bearer Token, pageNumber, size(10)")
+    public ResponseEntity<Page<PostResponse>> getUserPosts(@AuthenticationPrincipal UserEntity userEntity,
+                                                           @RequestParam(name = "page") int page,
+                                                           @RequestParam(name = "size") int size){
+        return ResponseEntity.ok(postService.getUserPosts(userEntity.getId(), PageRequest.of(page, size)));
+    }
+
+    @GetMapping("/posts/{id}")
+    @Operation(summary = "Get details of the post", description = "By id post")
+    public ResponseEntity<PostResponse> getPost(@PathVariable("id")String id){
+        return ResponseEntity.ok(postService.getPostById(id));
+    }
+
+    @PostMapping(value = "/user-posts", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Create new post", description = "Using Bearer Token, postDTO for details, multipart file for images")
+    public ResponseEntity<PostResponse> createPost(@AuthenticationPrincipal UserEntity userEntity,
+                                                   @ModelAttribute PostDTO postDTO,
+                                                   @RequestPart("images") List<MultipartFile> images){
+        try{
+            return ResponseEntity.ok(postService.createPost(userEntity.getId(), postDTO, images));
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/user-posts/{id}")
+    @Operation(summary = "Delete post", description = "By id")
+    public ResponseEntity<?> deletePost(@PathVariable("id") String id){
+        postService.deletePostById(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/user-posts/{id}")
+    @Operation(summary = "Update post", description = "Using id post and postDTO for details")
+    public ResponseEntity<?> updatePost(@PathVariable("id")String id,
+                                        @RequestBody PostDTO postDTO){
+        postService.updatePost(id, postDTO);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/posts/{id}/like")
+    @Operation(summary = "Like post", description = "Using id post and Bearer Token to like/unlike post")
+    public ResponseEntity<?> likePost(@AuthenticationPrincipal UserEntity userEntity,
+                                      @PathVariable("id") String postId){
+        postLikeService.likePost(postId, userEntity.getId());
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/posts/{id}/comments")
+    @Operation(summary = "Create comment", description = "Using id post, Bearer Token and commentDTO")
+    public ResponseEntity<CommentResponse> createComment(@PathVariable("id")String postId,
+                                                         @RequestBody CommentDTO commentDTO,
+                                                         @AuthenticationPrincipal UserEntity userEntity){
+        return ResponseEntity.ok(commentService.createComment(postId, userEntity.getId(), commentDTO));
+    }
+
+    @DeleteMapping("/comments/{id}")
+    @Operation(summary = "delete comment", description = "By id")
+    public ResponseEntity<?> deleteComment(@PathVariable("id") String id){
+        commentService.deleteComment(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/followers")
+    @Operation(summary = "Get user's follower", description = "Using Bearer Token")
+    public ResponseEntity<List<FollowerResponse>> getFollowers(@AuthenticationPrincipal UserEntity userEntity) {
+        try{
+            return ResponseEntity.ok(followerService.getFollowers(userEntity.getId()));
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/followers/{followerId}")
+    @Operation(summary = "Follow User", description = "Using id follower(user) and Bearer Token to follow/unfollow")
+    public ResponseEntity<?> follow(@PathVariable("followerId") String followerId, @AuthenticationPrincipal UserEntity userEntity){
+        followerService.follow(followerId, userEntity.getId());
+        return ResponseEntity.ok().build();
+    }
+}
