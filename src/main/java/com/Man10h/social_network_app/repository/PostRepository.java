@@ -32,20 +32,17 @@ public interface PostRepository extends JpaRepository<PostEntity, String> {
     @Query(
             value = """
     SELECT DISTINCT p FROM PostEntity p
-    JOIN p.userEntity u
-    WHERE u.id IN (
-      SELECT fe.followerId
-      FROM FollowerEntity fe
-      WHERE fe.userEntity.id = :id
-    )
+    LEFT JOIN FollowerEntity f 
+    ON f.followerId = p.userEntity.id 
+    WHERE f.userEntity.id = :id
+    ORDER BY 
+      CASE 
+        WHEN f.followerId IS NOT NULL THEN 0 ELSE 1
+      END,
+      p.createDate DESC
   """,
             countQuery = """
     SELECT COUNT(p.id) FROM PostEntity p
-    WHERE p.userEntity.id IN (
-      SELECT fe.followerId
-      FROM FollowerEntity fe
-      WHERE fe.userEntity.id = :id
-    )
   """
     )
     Page<PostEntity> getPosts(@Param("id") String userId, Pageable pageable);
@@ -60,4 +57,13 @@ public interface PostRepository extends JpaRepository<PostEntity, String> {
     WHERE p.id = :id 
 """)
     Page<PostEntity> getAllPosts(Pageable pageable);
+
+    @Query(value = """
+    SELECT DISTINCT p FROM PostEntity p
+    LEFT JOIN FETCH p.imageEntityList
+    WHERE p.title LIKE CONCAT('%', :title, '%')
+""")
+    Page<PostEntity> findByTitle(@Param("title") String title, Pageable pageable);
+
+    List<PostEntity> findByUserEntity(UserEntity userEntity);
 }

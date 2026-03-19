@@ -1,7 +1,7 @@
 package com.Man10h.social_network_app.model.response;
 
 import lombok.*;
-import org.springframework.web.multipart.MultipartFile;
+
 @Getter
 @Setter
 @Builder

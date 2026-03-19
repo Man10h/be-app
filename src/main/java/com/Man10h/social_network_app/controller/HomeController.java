@@ -95,4 +95,6 @@ public class HomeController {
         userService.forgotPassword(email);
         return ResponseEntity.ok().build();
     }
+
+
 }

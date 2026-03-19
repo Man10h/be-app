@@ -29,4 +29,18 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
         LEFT JOIN ImageEntity i ON i.userEntity.id = u.id
  """)
     Page<UserEntity> getAllUsers(Pageable pageable);
+
+
+    @Query("""
+    SELECT DISTINCT u FROM UserEntity u
+    LEFT JOIN ImageEntity i ON i.userEntity.id = u.id
+    WHERE (:name IS NULL OR 
+           u.username LIKE CONCAT('%', :name, '%') OR 
+           u.firstName LIKE CONCAT('%', :name, '%') OR 
+           u.lastName LIKE CONCAT('%', :name, '%'))
+    AND u.enabled = true
+""")
+    Page<UserEntity> findUsersByName(@Param("name") String name, Pageable pageable);
+
+
 }

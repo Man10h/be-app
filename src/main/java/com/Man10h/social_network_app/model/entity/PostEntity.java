@@ -41,4 +41,7 @@ public class PostEntity {
 
     @OneToMany(mappedBy = "postEntity", cascade = {CascadeType.MERGE, CascadeType.PERSIST}, orphanRemoval = true)
     private List<CommentEntity> commentEntityList;
+
+    @OneToMany(mappedBy = "postEntity", cascade = {CascadeType.MERGE, CascadeType.PERSIST}, orphanRemoval = true)
+    private List<ReportEntity> reportEntityList;
 }

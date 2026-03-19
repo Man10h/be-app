@@ -1,5 +1,6 @@
 package com.Man10h.social_network_app.configuration;
 
+import com.Man10h.social_network_app.exception.exceptions.NotFoundException;
 import com.Man10h.social_network_app.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -22,7 +23,7 @@ public class AuthenticationConfig {
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> {
-            return userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+            return userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
         };
     }
 

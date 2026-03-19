@@ -3,6 +3,7 @@ package com.Man10h.social_network_app.service;
 import com.Man10h.social_network_app.model.dto.PostDTO;
 import com.Man10h.social_network_app.model.dto.PostUpdateDTO;
 import com.Man10h.social_network_app.model.entity.PostEntity;
+import com.Man10h.social_network_app.model.entity.UserEntity;
 import com.Man10h.social_network_app.model.response.PostResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,4 +19,6 @@ public interface PostService {
     public void deletePostById(String id);
     public void updatePost(String id, PostDTO postDTO);
     public Page<PostResponse> getAllPosts(Pageable pageable);
+    public Page<PostResponse> findPostByTitle(String title, Pageable pageable);
+    public void deletePost(String id, UserEntity userEntity);
 }

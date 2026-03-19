@@ -18,11 +18,11 @@ public class NotificationEntity {
     private String id;
 
     @ManyToOne
-    @JoinTable(name = "receiver_id")
+    @JoinColumn(name = "receiver_id")
     private UserEntity receiver;
 
     @ManyToOne
-    @JoinTable(name = "sender_id")
+    @JoinColumn(name = "sender_id")
     private UserEntity sender;
 
     @Column(name = "content")

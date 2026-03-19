@@ -7,8 +7,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ErrorDTO {
-    private String message;
-    private String error;
-    private int code;
+public class ReportDTO {
+    private String title;
+    private String content;
 }

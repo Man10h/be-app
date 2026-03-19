@@ -1,6 +1,7 @@
 package com.Man10h.social_network_app.service.impl;
 
 import com.Man10h.social_network_app.exception.exceptions.NotFoundException;
+import com.Man10h.social_network_app.exception.exceptions.UnauthorizedException;
 import com.Man10h.social_network_app.model.dto.CommentDTO;
 import com.Man10h.social_network_app.model.entity.CommentEntity;
 import com.Man10h.social_network_app.model.entity.PostEntity;
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -63,11 +65,24 @@ public class CommentServiceImpl implements CommentService {
     public void deleteComment(String commentId) {
         try{
             commentRepository.deleteById(commentId);
-        } catch (NotFoundException e) {
-            throw new NotFoundException("Comment not found");
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public void deleteCommentByUser(String commentId, UserEntity userEntity) {
+        Optional<CommentEntity> optional = commentRepository.findById(commentId);
+        if(optional.isEmpty()){
+            throw new NotFoundException("Comment not found");
+        }
+        CommentEntity commentEntity = optional.get();
+
+        List<CommentEntity> commentEntityList = commentRepository.findByUserId(userEntity.getId());
+        if(!commentEntityList.contains(commentEntity)){
+            throw new UnauthorizedException("You are not authorized to delete this comment");
+        }
+        commentRepository.delete(commentEntity);
     }
 }

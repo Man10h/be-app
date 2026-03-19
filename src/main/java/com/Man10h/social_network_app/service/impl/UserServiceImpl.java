@@ -153,7 +153,7 @@ public class UserServiceImpl implements UserService {
         if(!userDTO.getGender().isEmpty()){
             userEntity.setGender(userDTO.getGender());
         }
-        if(!file.isEmpty()){
+        if(file != null && !file.isEmpty()){
             if(!userEntity.getImageEntityList().isEmpty()){
                 imageService.deleteByUserEntity(userEntity);
             }
@@ -230,6 +230,26 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
         send(email, "New Password: ", password);
         return true;
+    }
+
+    @Override
+    public Page<UserResponse> findUsersByName(String name, Pageable pageable) {
+        return userRepository.findUsersByName(name, pageable)
+                .map(userEntity -> {
+                    return UserResponse.builder()
+                            .id(userEntity.getId())
+                            .firstName(userEntity.getFirstName())
+                            .lastName(userEntity.getLastName())
+                            .gender(userEntity.getGender())
+                            .image(userEntity.getImageEntityList().isEmpty() ?
+                                            null : ImageResponse.builder()
+                                                    .id(userEntity.getImageEntityList().getFirst().getId())
+                                                    .url(userEntity.getImageEntityList().getFirst().getUrl())
+                                            .build()
+
+                                    )
+                            .build();
+                });
     }
 
     public String generateCode(){

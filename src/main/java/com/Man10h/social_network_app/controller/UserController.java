@@ -1,14 +1,8 @@
 package com.Man10h.social_network_app.controller;
 
-import com.Man10h.social_network_app.model.dto.CommentDTO;
-import com.Man10h.social_network_app.model.dto.PostDTO;
-import com.Man10h.social_network_app.model.dto.PostUpdateDTO;
-import com.Man10h.social_network_app.model.dto.UserDTO;
+import com.Man10h.social_network_app.model.dto.*;
 import com.Man10h.social_network_app.model.entity.UserEntity;
-import com.Man10h.social_network_app.model.response.CommentResponse;
-import com.Man10h.social_network_app.model.response.FollowerResponse;
-import com.Man10h.social_network_app.model.response.PostResponse;
-import com.Man10h.social_network_app.model.response.UserResponse;
+import com.Man10h.social_network_app.model.response.*;
 import com.Man10h.social_network_app.service.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -38,6 +32,7 @@ public class UserController {
     private final PostService postService;
     private final PostLikeService postLikeService;
     private final CommentService commentService;
+    private final ReportService reportService;
 
     @GetMapping("/profile")
     @Operation(summary = "Get user's profile", description = "Using Bearer Token")
@@ -54,7 +49,7 @@ public class UserController {
     @Operation(summary = "Update user's profile", description = "Using Bearer Token, UserDTO for details and multipart file for image")
     public ResponseEntity<Boolean> updateProfile(@ModelAttribute UserDTO userDTO,
                                                  @Parameter(hidden = true) @AuthenticationPrincipal UserEntity userEntity,
-                                                 @RequestPart("image") MultipartFile image) {
+                                                 @RequestPart(value = "image", required = false) MultipartFile image) {
         try{
             return ResponseEntity.ok(userService.updateProfile(userEntity.getId(), userDTO, image));
         } catch (Exception e) {
@@ -91,7 +86,7 @@ public class UserController {
     @Operation(summary = "Create new post", description = "Using Bearer Token, postDTO for details, multipart file for images")
     public ResponseEntity<PostResponse> createPost(@AuthenticationPrincipal UserEntity userEntity,
                                                    @ModelAttribute PostDTO postDTO,
-                                                   @RequestPart("images") List<MultipartFile> images){
+                                                   @RequestPart(value = "images", required = false) List<MultipartFile> images){
         try{
             return ResponseEntity.ok(postService.createPost(userEntity.getId(), postDTO, images));
         } catch (Exception e) {
@@ -102,8 +97,9 @@ public class UserController {
 
     @DeleteMapping("/user-posts/{id}")
     @Operation(summary = "Delete post", description = "By id")
-    public ResponseEntity<?> deletePost(@PathVariable("id") String id){
-        postService.deletePostById(id);
+    public ResponseEntity<?> deletePost(@AuthenticationPrincipal UserEntity userEntity,
+                                        @PathVariable("id") String id){
+        postService.deletePost(id, userEntity);
         return ResponseEntity.ok().build();
     }
 
@@ -133,8 +129,9 @@ public class UserController {
 
     @DeleteMapping("/comments/{id}")
     @Operation(summary = "delete comment", description = "By id")
-    public ResponseEntity<?> deleteComment(@PathVariable("id") String id){
-        commentService.deleteComment(id);
+    public ResponseEntity<?> deleteComment(@AuthenticationPrincipal UserEntity userEntity,
+                                           @PathVariable("id") String id){
+        commentService.deleteCommentByUser(id, userEntity);
         return ResponseEntity.ok().build();
     }
 
@@ -153,6 +150,36 @@ public class UserController {
     @Operation(summary = "Follow User", description = "Using id follower(user) and Bearer Token to follow/unfollow")
     public ResponseEntity<?> follow(@PathVariable("followerId") String followerId, @AuthenticationPrincipal UserEntity userEntity){
         followerService.follow(followerId, userEntity.getId());
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/users")
+    @Operation(summary = "Find user by name", description = "Find user by entering name")
+    public ResponseEntity<Page<UserResponse>> findUsers(@RequestParam(value = "name", required = false) String name,
+                                                        @RequestParam(value = "page") int page,
+                                                        @RequestParam(value = "size") int size){
+        return ResponseEntity.ok(userService.findUsersByName(name, PageRequest.of(page, size)));
+    }
+
+    @GetMapping("/reports")
+    public ResponseEntity<Page<ReportResponse>> findReportByUser(@AuthenticationPrincipal UserEntity userEntity,
+                                                                 @RequestParam(value = "page") int page,
+                                                                 @RequestParam(value = "size") int size){
+        return ResponseEntity.ok(reportService.getUserReports(userEntity, PageRequest.of(page, size)));
+    }
+
+    @PostMapping("/posts/{id}/reports")
+    public ResponseEntity<Void> createReport(@PathVariable("id") String postId,
+                                             @AuthenticationPrincipal UserEntity userEntity,
+                                             @RequestBody ReportDTO reportDTO){
+        reportService.createReport(postId, userEntity, reportDTO);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/reports/{id}")
+    public ResponseEntity<Void> deleteReport(@AuthenticationPrincipal UserEntity userEntity,
+                                             @PathVariable("id") Long id){
+        reportService.deleteReportByUser(id, userEntity);
         return ResponseEntity.ok().build();
     }
 }

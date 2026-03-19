@@ -15,7 +15,7 @@ import java.util.Date;
         name = "post_like",
         uniqueConstraints = {
                 @UniqueConstraint(
-                        name = "uk_post_user",
+                        name = "uk_like_post_user",
                         columnNames = {"post_id", "user_id"}
                 )
         }

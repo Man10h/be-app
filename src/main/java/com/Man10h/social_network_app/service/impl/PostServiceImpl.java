@@ -1,6 +1,7 @@
 package com.Man10h.social_network_app.service.impl;
 
 import com.Man10h.social_network_app.exception.exceptions.NotFoundException;
+import com.Man10h.social_network_app.exception.exceptions.UnauthorizedException;
 import com.Man10h.social_network_app.model.dto.PostDTO;
 import com.Man10h.social_network_app.model.dto.PostUpdateDTO;
 import com.Man10h.social_network_app.model.entity.CommentEntity;
@@ -70,7 +71,7 @@ public class PostServiceImpl implements PostService {
 
         List<ImageEntity> imageEntityList = new ArrayList<>();
         List<ImageResponse> imageResponseList = new ArrayList<>();
-        if(!images.isEmpty()){
+        if(images != null && !images.isEmpty()){
             for(MultipartFile file : images){
                 ImageEntity imageEntity = imageService.createImageWithPostEntity(file, post);
                 imageEntityList.add(imageEntity);
@@ -174,5 +175,26 @@ public class PostServiceImpl implements PostService {
     public Page<PostResponse> getAllPosts(Pageable pageable) {
         return postRepository.getAllPosts(pageable)
                 .map(this::convertPostToPostResponse);
+    }
+
+    @Override
+    public Page<PostResponse> findPostByTitle(String title, Pageable pageable) {
+        return postRepository.findByTitle(title, pageable)
+                .map(this::convertPostToPostResponse);
+    }
+
+    @Override
+    public void deletePost(String id, UserEntity userEntity) {
+        Optional<PostEntity> optionalPost = postRepository.findById(id);
+        if(optionalPost.isEmpty()){
+            throw new NotFoundException("Post not found");
+        }
+        PostEntity postEntity = optionalPost.get();
+        List<PostEntity> postEntityList = postRepository.findByUserEntity(userEntity);
+        if(!postEntityList.contains(postEntity)){
+            throw new UnauthorizedException("Account not authorized to delete this post");
+        }
+        imageService.deleteByPostEntity(optionalPost.get());
+        postRepository.deleteById(id);
     }
 }

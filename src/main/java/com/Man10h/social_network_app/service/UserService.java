@@ -19,4 +19,5 @@ public interface UserService {
     public void enableUser(String userId);
     public Page<UserResponse> getAllUsers(Pageable pageable);
     public boolean forgotPassword(String email);
+    public Page<UserResponse> findUsersByName(String name, Pageable pageable);
 }
