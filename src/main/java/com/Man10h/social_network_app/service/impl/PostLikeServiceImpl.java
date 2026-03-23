@@ -28,7 +28,6 @@ public class PostLikeServiceImpl implements PostLikeService {
     private final NotificationService notificationService;
 
 
-    @Override
     @Transactional
     public void likePost(String postId, String userId) {
         Optional<PostEntity> optionalPostEntity = postRepository.findById(postId);

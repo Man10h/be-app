@@ -26,10 +26,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.channels.AcceptPendingException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -43,9 +45,10 @@ public class UserServiceImpl implements UserService {
     private final ImageService imageService;
     private final CloudinaryService cloudinaryService;
     private final MailService mailService;
+    private final ImageRepository imageRepository;
 
 
-    @Override
+    @Transactional
     public Boolean register(UserRegisterDTO userRegisterDTO) {
         Optional<UserEntity> optionalUsername = userRepository.findByUsername(userRegisterDTO.getUsername());
         if(optionalUsername.isPresent()) {
@@ -133,7 +136,7 @@ public class UserServiceImpl implements UserService {
         return tokenService.generateToken(userEntity);
     }
 
-    @Override
+    @Transactional
     public Boolean updateProfile(String userId, UserDTO userDTO, MultipartFile file) {
         Optional<UserEntity> optional = userRepository.findById(userId);
         if(optional.isEmpty()){
@@ -181,7 +184,7 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
-    @Override
+    @Transactional
     public void enableUser(String userId) {
         Optional<UserEntity> optional = userRepository.findById(userId);
         if(optional.isEmpty()){
@@ -194,24 +197,28 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Page<UserResponse> getAllUsers(Pageable pageable) {
-        return userRepository.getAllUsers(pageable)
-                .map(userEntity -> {
-                    return UserResponse.builder()
-                            .id(userEntity.getId())
-                            .image(userEntity.getImageEntityList().isEmpty() ?
-                                    null : ImageResponse.builder()
-                                    .url(userEntity.getImageEntityList().getFirst().getUrl())
-                                    .id(userEntity.getImageEntityList().getFirst().getId())
-                                    .build()
-                            )
-                            .firstName(userEntity.getFirstName())
-                            .lastName(userEntity.getLastName())
-                            .gender(userEntity.getGender())
-                            .build();
-                });
+
+        Page<UserEntity> userEntityPage = userRepository.getAllUsers(pageable);
+//        List<UserEntity> userEntityList = userEntityPage.getContent();
+//        userEntityList.forEach(u -> u.getImageEntityList().size());
+
+        return userEntityPage.map(userEntity ->
+                UserResponse.builder()
+                        .id(userEntity.getId())
+                        .image(userEntity.getImageEntityList().isEmpty() ? null :
+                                ImageResponse.builder()
+                                        .url(userEntity.getImageEntityList().getFirst().getUrl())
+                                        .id(userEntity.getImageEntityList().getFirst().getId())
+                                        .build()
+                        )
+                        .firstName(userEntity.getFirstName())
+                        .lastName(userEntity.getLastName())
+                        .gender(userEntity.getGender())
+                        .build()
+        );
     }
 
-    @Override
+    @Transactional
     public boolean forgotPassword(String email) {
         Optional<UserEntity> optionalEmail = userRepository.findByEmail(email);
         if(optionalEmail.isEmpty()){
@@ -228,24 +235,25 @@ public class UserServiceImpl implements UserService {
         return true;
     }
 
-    @Override
-    public Page<UserResponse> findUsersByName(String name, Pageable pageable) {
-        return userRepository.findUsersByName(name, pageable)
-                .map(userEntity -> {
-                    return UserResponse.builder()
-                            .id(userEntity.getId())
-                            .firstName(userEntity.getFirstName())
-                            .lastName(userEntity.getLastName())
-                            .gender(userEntity.getGender())
-                            .image(userEntity.getImageEntityList().isEmpty() ?
-                                            null : ImageResponse.builder()
-                                                    .id(userEntity.getImageEntityList().getFirst().getId())
-                                                    .url(userEntity.getImageEntityList().getFirst().getUrl())
-                                            .build()
 
-                                    )
-                            .build();
-                });
+    @Override
+    @Transactional(readOnly = true)
+    public Page<UserResponse> findUsersByName(String name, Pageable pageable) {
+
+        return userRepository.findUsersByName(name, pageable).map(userEntity ->
+                UserResponse.builder()
+                        .id(userEntity.getId())
+                        .image(userEntity.getImageEntityList().isEmpty() ? null :
+                                ImageResponse.builder()
+                                        .url(userEntity.getImageEntityList().getFirst().getUrl())
+                                        .id(userEntity.getImageEntityList().getFirst().getId())
+                                        .build()
+                        )
+                        .firstName(userEntity.getFirstName())
+                        .lastName(userEntity.getLastName())
+                        .gender(userEntity.getGender())
+                        .build()
+        );
     }
 
     public String generateCode(){

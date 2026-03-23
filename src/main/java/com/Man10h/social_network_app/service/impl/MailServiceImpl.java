@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,6 +18,7 @@ public class MailServiceImpl implements MailService {
     private final JavaMailSender mailSender;
 
     @Override
+    @Async("asyncExecutor")
     public void sendMail(String to, String subject, String content) {
         try{
             MimeMessage mimeMessage = mailSender.createMimeMessage();

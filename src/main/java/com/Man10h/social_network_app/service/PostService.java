@@ -13,8 +13,9 @@ import java.util.List;
 
 public interface PostService {
     public PostResponse createPost(String userId, PostDTO postDTO, List<MultipartFile> images);
+    public PostResponse getPostDetailById(String id);
     public PostResponse getPostById(String id);
-    public Page<PostResponse> getFollowerPosts(String userId, Pageable pageable);
+    public Page<PostResponse> getFeedPosts(String userId, Pageable pageable);
     public Page<PostResponse> getUserPosts(String userId, Pageable pageable);
     public void deletePostById(String id);
     public void updatePost(String id, PostDTO postDTO);

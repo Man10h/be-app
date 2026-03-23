@@ -51,11 +51,11 @@ public class UserController {
 
 
     @GetMapping("/follower-posts")
-    @Operation(summary = "Get a page of follower's post", description = "Using Bearer Token, pageNumber, size(10)")
-    public ResponseEntity<Page<PostResponse>> getPosts(@AuthenticationPrincipal UserEntity userEntity,
+    @Operation(summary = "Get a page of feed post", description = "Using Bearer Token, pageNumber, size(10)")
+    public ResponseEntity<Page<PostResponse>> getFeedPosts(@AuthenticationPrincipal UserEntity userEntity,
                                                        @RequestParam(name = "page") int page,
                                                        @RequestParam(name = "size") int size){
-        return ResponseEntity.ok(postService.getFollowerPosts(userEntity.getId(), PageRequest.of(page, size)));
+        return ResponseEntity.ok(postService.getFeedPosts(userEntity.getId(), PageRequest.of(page, size)));
     }
 
     @GetMapping("/user-posts")
@@ -142,6 +142,7 @@ public class UserController {
     }
 
     @GetMapping("/reports")
+    @Operation(summary = "Get all user's reports", description = "Get all user's reports by authenticating")
     public ResponseEntity<Page<ReportResponse>> findReportByUser(@AuthenticationPrincipal UserEntity userEntity,
                                                                  @RequestParam(value = "page") int page,
                                                                  @RequestParam(value = "size") int size){
@@ -149,6 +150,7 @@ public class UserController {
     }
 
     @PostMapping("/posts/{id}/reports")
+    @Operation(summary = "Create reports", description = "Create reports by entering details")
     public ResponseEntity<Void> createReport(@PathVariable("id") String postId,
                                              @AuthenticationPrincipal UserEntity userEntity,
                                              @RequestBody ReportDTO reportDTO){
@@ -157,6 +159,7 @@ public class UserController {
     }
 
     @DeleteMapping("/reports/{id}")
+    @Operation(summary = "Delete report", description = "Delete report by id")
     public ResponseEntity<Void> deleteReport(@AuthenticationPrincipal UserEntity userEntity,
                                              @PathVariable("id") Long id){
         reportService.deleteReportByUser(id, userEntity);

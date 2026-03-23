@@ -53,17 +53,22 @@ public interface PostRepository extends JpaRepository<PostEntity, String> {
 
     @Query(value = """
     SELECT DISTINCT p FROM PostEntity p
-    LEFT JOIN FETCH p.imageEntityList
-    WHERE p.id = :id 
 """)
     Page<PostEntity> getAllPosts(Pageable pageable);
 
     @Query(value = """
     SELECT DISTINCT p FROM PostEntity p
-    LEFT JOIN FETCH p.imageEntityList
     WHERE p.title LIKE CONCAT('%', :title, '%')
 """)
     Page<PostEntity> findByTitle(@Param("title") String title, Pageable pageable);
 
     List<PostEntity> findByUserEntity(UserEntity userEntity);
+
+    @Query("""
+    SELECT DISTINCT p FROM PostEntity p
+    LEFT JOIN FETCH p.contentModerationEntityList cm
+    LEFT JOIN FETCH cm.contentModerationResultEntityList 
+    WHERE p.id = :id
+""")
+    Optional<PostEntity> getPostWithContentModeration(@Param("id") String id);
 }

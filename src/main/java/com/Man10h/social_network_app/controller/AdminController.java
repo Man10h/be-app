@@ -26,6 +26,11 @@ public class AdminController {
     private final ReportService reportService;
 
 
+    @GetMapping("/posts/{id}")
+    @Operation(summary = "Get details of the post", description = "By id post")
+    public ResponseEntity<PostResponse> getPost(@PathVariable("id")String id){
+        return ResponseEntity.ok(postService.getPostDetailById(id));
+    }
 
     @DeleteMapping("/posts/{id}")
     @Operation(summary = "Delete post", description = "By id")
@@ -43,20 +48,21 @@ public class AdminController {
     }
 
 
-
-
     @GetMapping("/reports")
+    @Operation(summary = "Get all reports")
     public ResponseEntity<Page<ReportResponse>> getAllReports( @RequestParam(value = "page") int page,
                                                                @RequestParam(value = "size") int size){
         return ResponseEntity.ok(reportService.getAllReports(PageRequest.of(page, size)));
     }
 
     @GetMapping("/reports/{id}")
+    @Operation(summary = "Find report by id")
     public ResponseEntity<ReportResponse> findReportById(@PathVariable("id") Long id){
         return ResponseEntity.ok(reportService.findById(id));
     }
 
     @GetMapping("/posts/{id}/reports")
+    @Operation(summary = "Get post's reports")
     public ResponseEntity<Page<ReportResponse>> findReportByPost(@PathVariable("id") String id,
                                                                  @RequestParam(value = "page") int page,
                                                                  @RequestParam(value = "size") int size){
@@ -64,6 +70,7 @@ public class AdminController {
     }
 
     @GetMapping("/users/{id}/reports")
+    @Operation(summary = "Get user's reports")
     public ResponseEntity<Page<ReportResponse>> findReportByUser(@PathVariable("id") String id,
                                                                  @RequestParam(value = "page") int page,
                                                                  @RequestParam(value = "size") int size){
@@ -71,6 +78,7 @@ public class AdminController {
     }
 
     @DeleteMapping("/reports/{id}")
+    @Operation(summary = "Delete report by id")
     public ResponseEntity<Void> deleteReport(@PathVariable("id") Long id){
         reportService.deleteReport(id);
         return ResponseEntity.ok().build();

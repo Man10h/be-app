@@ -1,25 +1,23 @@
 package com.Man10h.social_network_app.service.impl;
 
+import com.Man10h.social_network_app.exception.exceptions.GlobalException;
 import com.Man10h.social_network_app.exception.exceptions.NotFoundException;
 import com.Man10h.social_network_app.exception.exceptions.UnauthorizedException;
 import com.Man10h.social_network_app.model.dto.PostDTO;
 import com.Man10h.social_network_app.model.dto.PostUpdateDTO;
-import com.Man10h.social_network_app.model.entity.CommentEntity;
-import com.Man10h.social_network_app.model.entity.ImageEntity;
-import com.Man10h.social_network_app.model.entity.PostEntity;
-import com.Man10h.social_network_app.model.entity.UserEntity;
-import com.Man10h.social_network_app.model.response.CommentResponse;
-import com.Man10h.social_network_app.model.response.ImageResponse;
-import com.Man10h.social_network_app.model.response.PostResponse;
+import com.Man10h.social_network_app.model.entity.*;
+import com.Man10h.social_network_app.model.enums.ContentType;
+import com.Man10h.social_network_app.model.response.*;
+import com.Man10h.social_network_app.repository.ContentModerationRepository;
 import com.Man10h.social_network_app.repository.PostRepository;
 import com.Man10h.social_network_app.repository.UserRepository;
-import com.Man10h.social_network_app.service.CloudinaryService;
-import com.Man10h.social_network_app.service.ImageService;
-import com.Man10h.social_network_app.service.PostService;
+import com.Man10h.social_network_app.service.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
@@ -32,6 +30,9 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final CloudinaryService cloudinaryService;
     private final ImageService imageService;
+    private final ContentModerationService contentModerationService;
+    private final ContentModerationRepository contentModerationRepository;
+
 
     public PostResponse convertPostToPostResponse(PostEntity postEntity) {
         List<ImageResponse> imageResponseList = new ArrayList<>();
@@ -51,7 +52,7 @@ public class PostServiceImpl implements PostService {
                 .build();
     }
 
-    @Override
+    @Transactional
     public PostResponse createPost(String userId, PostDTO postDTO, List<MultipartFile> images) {
         Optional<UserEntity> optionalUser = userRepository.findById(userId);
         if(optionalUser.isEmpty()){
@@ -68,7 +69,8 @@ public class PostServiceImpl implements PostService {
                 .userEntity(user)
                 .build();
         postRepository.save(post);
-
+        //
+        contentModerationService.moderatePost(post, images);
         List<ImageEntity> imageEntityList = new ArrayList<>();
         List<ImageResponse> imageResponseList = new ArrayList<>();
         if(images != null && !images.isEmpty()){
@@ -97,13 +99,14 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostResponse getPostById(String id) {
+    public PostResponse getPostDetailById(String id) {
         Optional<PostEntity> optionalPost = postRepository.getPostsWithImage(id);
         if(optionalPost.isEmpty()){
             throw new NotFoundException("Post not found");
         }
         PostEntity post = optionalPost.get();
         postRepository.getPostsWithComments(id);
+        postRepository.getPostWithContentModeration(id);
 
         List<ImageResponse> imageResponseList = new ArrayList<>();
         for(ImageEntity imageEntity : post.getImageEntityList()){
@@ -124,6 +127,72 @@ public class PostServiceImpl implements PostService {
                     .build();
             commentResponseList.add(commentResponse);
         }
+
+        List<ContentModerationResponse> contentModerationResponseList = new ArrayList<>();
+        for(ContentModerationEntity contentModerationEntity: post.getContentModerationEntityList()){
+            List<ContentModerationResultResponse> contentModerationResultResponseList = new ArrayList<>();
+            for(ContentModerationResultEntity contentModerationResultEntity: contentModerationEntity.getContentModerationResultEntityList()){
+                contentModerationResultResponseList.add(
+                        ContentModerationResultResponse.builder()
+                                .id(contentModerationResultEntity.getId())
+                                .category(contentModerationResultEntity.getCategory())
+                                .severity(contentModerationResultEntity.getSeverity())
+                                .build()
+                );
+            }
+            contentModerationResponseList.add(
+                    ContentModerationResponse.builder()
+                            .id(contentModerationEntity.getId())
+                            .contentModerationResultResponseList(contentModerationResultResponseList)
+                            .contentType(contentModerationEntity.getContentType().toString())
+                            .createAt(contentModerationEntity.getCreateAt())
+                            .provider(contentModerationEntity.getProvider())
+                            .build()
+            );
+        }
+
+
+        return PostResponse.builder()
+                .images(imageResponseList)
+                .title(post.getTitle())
+                .content(post.getContent())
+                .commentResponseList(commentResponseList)
+                .like(post.getLikeCount())
+                .id(post.getId())
+                .moderationResponseList(contentModerationResponseList)
+                .build();
+    }
+
+    @Override
+    public PostResponse getPostById(String id) {
+        Optional<PostEntity> optionalPost = postRepository.getPostsWithImage(id);
+        if(optionalPost.isEmpty()){
+            throw new NotFoundException("Post not found");
+        }
+        PostEntity post = optionalPost.get();
+        postRepository.getPostsWithComments(id);
+
+
+        List<ImageResponse> imageResponseList = new ArrayList<>();
+        for(ImageEntity imageEntity : post.getImageEntityList()){
+            ImageResponse imageResponse = ImageResponse.builder()
+                    .url(imageEntity.getUrl())
+                    .id(imageEntity.getId())
+                    .build();
+            imageResponseList.add(imageResponse);
+        }
+        List<CommentResponse> commentResponseList = new ArrayList<>();
+        for(CommentEntity commentEntity : post.getCommentEntityList()){
+            CommentResponse commentResponse = CommentResponse.builder()
+                    .id(commentEntity.getId())
+                    .content(commentEntity.getContent())
+                    .fullName(commentEntity.getFullName())
+                    .url(commentEntity.getUrl())
+                    .userId(commentEntity.getUserId())
+                    .build();
+            commentResponseList.add(commentResponse);
+        }
+
         return PostResponse.builder()
                 .images(imageResponseList)
                 .title(post.getTitle())
@@ -135,7 +204,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Page<PostResponse> getFollowerPosts(String userId, Pageable pageable) {
+    public Page<PostResponse> getFeedPosts(String userId, Pageable pageable) {
         return postRepository.getPosts(userId, pageable)
                 .map(this::convertPostToPostResponse);
     }
@@ -146,7 +215,7 @@ public class PostServiceImpl implements PostService {
                 .map(this::convertPostToPostResponse);
     }
 
-    @Override
+    @Transactional
     public void deletePostById(String id) {
         Optional<PostEntity> optionalPost = postRepository.findById(id);
         if(optionalPost.isEmpty()){
@@ -156,7 +225,7 @@ public class PostServiceImpl implements PostService {
         postRepository.deleteById(id);
     }
 
-    @Override
+    @Transactional
     public void updatePost(String id, PostDTO postDTO) {
         Optional<PostEntity> optionalPost = postRepository.findById(id);
         if(optionalPost.isEmpty()){
@@ -169,6 +238,13 @@ public class PostServiceImpl implements PostService {
         if(!postDTO.getTitle().isEmpty()){
             post.setTitle(postDTO.getTitle());
         }
+        postRepository.save(post);
+        try{
+            contentModerationRepository.deleteByContentTypeAndPostEntity(ContentType.TEXT, post);
+        } catch (Exception e) {
+            throw new GlobalException(e.getMessage());
+        }
+        contentModerationService.moderatePost(post, null);
     }
 
     @Override
@@ -183,7 +259,7 @@ public class PostServiceImpl implements PostService {
                 .map(this::convertPostToPostResponse);
     }
 
-    @Override
+    @Transactional
     public void deletePost(String id, UserEntity userEntity) {
         Optional<PostEntity> optionalPost = postRepository.findById(id);
         if(optionalPost.isEmpty()){

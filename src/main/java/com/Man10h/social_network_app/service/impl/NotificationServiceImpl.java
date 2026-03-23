@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.swing.text.html.Option;
 import java.util.Date;
@@ -31,7 +32,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final FollowerRepository followerRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
-    @Override
+    @Transactional
     public void createAndSend(UserEntity sender, UserEntity receiver, String content, String targetId) {
         try{
             NotificationEntity notificationEntity = NotificationEntity.builder()
@@ -57,7 +58,7 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
-    @Override
+    @Transactional
     public void likePost(String postId, UserEntity sender) {
         Optional<PostEntity> optional = postRepository.findById(postId);
         if(optional.isEmpty()){
@@ -69,7 +70,7 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
-    @Override
+    @Transactional
     public void commentPost(String postId, UserEntity sender) {
         Optional<PostEntity> optional = postRepository.findById(postId);
         if(optional.isEmpty()){
@@ -81,7 +82,7 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
-    @Override
+    @Transactional
     public void followUser(String followerId, UserEntity currentUser) {
         Optional<UserEntity> optionalFollower = userRepository.findById(followerId);
         if(optionalFollower.isEmpty()){

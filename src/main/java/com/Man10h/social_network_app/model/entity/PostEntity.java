@@ -6,6 +6,7 @@ import org.hibernate.annotations.BatchSize;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "post")
@@ -36,12 +37,16 @@ public class PostEntity {
     private UserEntity userEntity;
 
     @OneToMany(mappedBy = "postEntity", cascade = {CascadeType.MERGE, CascadeType.PERSIST}, orphanRemoval = true)
-    @BatchSize(size = 10)// max post fetch load: 10
+    @BatchSize(size = 10)//max post fetch load: 10
     private List<ImageEntity> imageEntityList;
 
     @OneToMany(mappedBy = "postEntity", cascade = {CascadeType.MERGE, CascadeType.PERSIST}, orphanRemoval = true)
+    @BatchSize(size = 10)//max post fetch load: 10
     private List<CommentEntity> commentEntityList;
 
     @OneToMany(mappedBy = "postEntity", cascade = {CascadeType.MERGE, CascadeType.PERSIST}, orphanRemoval = true)
     private List<ReportEntity> reportEntityList;
+
+    @OneToMany(mappedBy = "postEntity", cascade = {CascadeType.MERGE, CascadeType.PERSIST}, orphanRemoval = true)
+    private Set<ContentModerationEntity> contentModerationEntityList;
 }

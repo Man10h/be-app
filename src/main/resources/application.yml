@@ -15,6 +15,9 @@ spring:
     hibernate:
       ddl-auto: none
     show-sql: true
+    properties:
+      hibernate:
+        default_batch_fetch_size: 10
 
   mail:
     host: smtp.gmail.com
@@ -42,3 +45,7 @@ cloudinary:
   api_key: 829565713471837
   api_secret: oHpiWWc8qqRFZUkj-kBtXhsVcJ8
   cloud_name: djuq2enmy
+
+azure:
+  api_key: 9AmCriorbFDfgJSUEN4foN8uTELaxggb9KSafvABdGfRCbXu40ZqJQQJ99CBACqBBLyXJ3w3AAAHACOGoBIS
+  endpoint: https://be-app-content-safety.cognitiveservices.azure.com

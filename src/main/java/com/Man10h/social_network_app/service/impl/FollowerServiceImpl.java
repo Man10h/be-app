@@ -28,7 +28,6 @@ public class FollowerServiceImpl implements FollowerService {
         return followerRepository.getFollowers(userId);
     }
 
-    @Override
     @Transactional
     public void follow(String followerId, String userId) {
         Optional<UserEntity> optionalUserEntity = userRepository.findById(userId);

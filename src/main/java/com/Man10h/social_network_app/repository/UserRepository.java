@@ -26,19 +26,29 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
 
     @Query(value = """
         SELECT DISTINCT u FROM UserEntity u
-        LEFT JOIN ImageEntity i ON i.userEntity.id = u.id
+        JOIN u.roleEntity r
+        WHERE r.id != 1
  """)
     Page<UserEntity> getAllUsers(Pageable pageable);
 
 
-    @Query("""
-    SELECT DISTINCT u FROM UserEntity u
-    LEFT JOIN ImageEntity i ON i.userEntity.id = u.id
-    WHERE (:name IS NULL OR 
-           u.username LIKE CONCAT('%', :name, '%') OR 
-           u.firstName LIKE CONCAT('%', :name, '%') OR 
-           u.lastName LIKE CONCAT('%', :name, '%'))
-    AND u.enabled = true
+    @Query(value = """
+        SELECT DISTINCT u FROM UserEntity u
+        JOIN FETCH u.roleEntity r
+        WHERE (:name IS NULL OR 
+               u.username LIKE CONCAT('%', :name, '%') OR 
+               u.firstName LIKE CONCAT('%', :name, '%') OR 
+               u.lastName LIKE CONCAT('%', :name, '%'))
+        AND u.enabled = true AND r.id != 1
+""",
+    countQuery = """
+        SELECT COUNT(DISTINCT u) FROM UserEntity u
+                JOIN u.roleEntity r
+                WHERE (:name IS NULL OR\s
+                       u.username LIKE CONCAT('%', :name, '%') OR\s
+                       u.firstName LIKE CONCAT('%', :name, '%') OR\s
+                       u.lastName LIKE CONCAT('%', :name, '%'))
+                AND u.enabled = true AND r.id != 1
 """)
     Page<UserEntity> findUsersByName(@Param("name") String name, Pageable pageable);
 

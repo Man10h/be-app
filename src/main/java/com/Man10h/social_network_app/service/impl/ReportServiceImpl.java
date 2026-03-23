@@ -101,7 +101,7 @@ public class ReportServiceImpl implements ReportService {
                 .map(this::converted);
     }
 
-    @Override
+    @Transactional
     public void deleteReportByUser(Long reportId, UserEntity userEntity) {
         Optional<ReportEntity> optional = reportRepository.findById(reportId);
         if(optional.isEmpty()) {

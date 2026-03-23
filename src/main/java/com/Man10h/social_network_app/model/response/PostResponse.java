@@ -15,5 +15,6 @@ public class PostResponse {
     private String content;
     private List<ImageResponse> images;
     private List<CommentResponse> commentResponseList;
+    private List<ContentModerationResponse> moderationResponseList;
     private Long like;
 }

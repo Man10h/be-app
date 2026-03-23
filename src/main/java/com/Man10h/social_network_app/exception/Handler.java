@@ -35,6 +35,8 @@ public class Handler {
         return ResponseEntity.ok(
           ErrorDTO.builder()
                   .message(e.getMessage())
+                  .error(HttpStatus.CONFLICT.getReasonPhrase())
+                  .code(HttpStatus.CONFLICT.value())
                   .build()
         );
     }

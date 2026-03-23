@@ -15,6 +15,7 @@ import com.Man10h.social_network_app.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,7 +29,7 @@ public class CommentServiceImpl implements CommentService {
     private final PostRepository postRepository;
     private final NotificationService notificationService;
 
-    @Override
+    @Transactional
     public CommentResponse createComment(String postId, String userId, CommentDTO comment) {
         Optional<UserEntity> optionalUserEntity = userRepository.getProfile(userId);
         Optional<PostEntity> optionalPostEntity = postRepository.findById(postId);
@@ -61,7 +62,7 @@ public class CommentServiceImpl implements CommentService {
                 .build();
     }
 
-    @Override
+    @Transactional
     public void deleteComment(String commentId) {
         try{
             commentRepository.deleteById(commentId);
@@ -71,7 +72,7 @@ public class CommentServiceImpl implements CommentService {
         }
     }
 
-    @Override
+    @Transactional
     public void deleteCommentByUser(String commentId, UserEntity userEntity) {
         Optional<CommentEntity> optional = commentRepository.findById(commentId);
         if(optional.isEmpty()){
