@@ -37,13 +37,8 @@ public class HomeController {
             return ResponseEntity.status(400).build();
         }
         else {
-            try{
-                userService.register(userRegisterDTO);
-                return ResponseEntity.ok().build();
-            } catch (Exception e) {
-                log.error(e.getMessage());
-                return ResponseEntity.status(400).build();
-            }
+            userService.register(userRegisterDTO);
+            return ResponseEntity.ok().build();
         }
     }
 
@@ -56,17 +51,12 @@ public class HomeController {
             return ResponseEntity.status(400).build();
         }
         else {
-            try{
-                String token = userService.login(userLoginDTO);
-                if(token == null) {
-                    log.error("Token is null");
-                    return ResponseEntity.status(400).build();
-                }
-                return ResponseEntity.ok(token);
-            } catch (Exception e) {
-                log.error(e.getMessage());
+            String token = userService.login(userLoginDTO);
+            if(token == null) {
+                log.error("Token is null");
                 return ResponseEntity.status(400).build();
             }
+            return ResponseEntity.ok(token);
         }
     }
 
@@ -75,18 +65,13 @@ public class HomeController {
     public ResponseEntity<?> loginWithGoogle(
             @RequestBody Map<String, Objects> request) {
 
-            try{
-                String idToken = request.get("idToken").toString();
-                String token = userService.loginWithGoogle(idToken);
-                if(token == null) {
-                    log.error("Token is empty");
-                    return ResponseEntity.status(400).build();
-                }
-                return ResponseEntity.ok(token);
-            } catch (Exception e) {
-                log.error(e.getMessage());
-                return ResponseEntity.status(400).build();
-            }
+        String idToken = request.get("idToken").toString();
+        String token = userService.loginWithGoogle(idToken);
+        if(token == null) {
+            log.error("Token is empty");
+            return ResponseEntity.status(400).build();
+        }
+        return ResponseEntity.ok(token);
     }
 
     @GetMapping("/forgot-password")

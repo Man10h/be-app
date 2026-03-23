@@ -37,12 +37,7 @@ public class UserController {
     @GetMapping("/profile")
     @Operation(summary = "Get user's profile", description = "Using Bearer Token")
     public ResponseEntity<UserResponse> getProfile(@AuthenticationPrincipal UserEntity userEntity) {
-        try{
-           return ResponseEntity.ok(userService.getProfile(userEntity.getId()));
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(userService.getProfile(userEntity.getId()));
     }
 
     @PostMapping(value = "/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -50,12 +45,7 @@ public class UserController {
     public ResponseEntity<Boolean> updateProfile(@ModelAttribute UserDTO userDTO,
                                                  @Parameter(hidden = true) @AuthenticationPrincipal UserEntity userEntity,
                                                  @RequestPart(value = "image", required = false) MultipartFile image) {
-        try{
-            return ResponseEntity.ok(userService.updateProfile(userEntity.getId(), userDTO, image));
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(userService.updateProfile(userEntity.getId(), userDTO, image));
     }
 
 
@@ -87,12 +77,7 @@ public class UserController {
     public ResponseEntity<PostResponse> createPost(@AuthenticationPrincipal UserEntity userEntity,
                                                    @ModelAttribute PostDTO postDTO,
                                                    @RequestPart(value = "images", required = false) List<MultipartFile> images){
-        try{
-            return ResponseEntity.ok(postService.createPost(userEntity.getId(), postDTO, images));
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(postService.createPost(userEntity.getId(), postDTO, images));
     }
 
     @DeleteMapping("/user-posts/{id}")
@@ -138,12 +123,7 @@ public class UserController {
     @GetMapping("/followers")
     @Operation(summary = "Get user's follower", description = "Using Bearer Token")
     public ResponseEntity<List<FollowerResponse>> getFollowers(@AuthenticationPrincipal UserEntity userEntity) {
-        try{
-            return ResponseEntity.ok(followerService.getFollowers(userEntity.getId()));
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(followerService.getFollowers(userEntity.getId()));
     }
 
     @PostMapping("/followers/{followerId}")

@@ -1,6 +1,9 @@
 package com.Man10h.social_network_app.service.impl;
 
+import com.Man10h.social_network_app.exception.exceptions.AccountNotEnabledException;
+import com.Man10h.social_network_app.exception.exceptions.InvalidCredentialsException;
 import com.Man10h.social_network_app.exception.exceptions.NotFoundException;
+import com.Man10h.social_network_app.exception.exceptions.UserAlreadyExistsException;
 import com.Man10h.social_network_app.model.dto.UserDTO;
 import com.Man10h.social_network_app.model.dto.UserLoginDTO;
 import com.Man10h.social_network_app.model.dto.UserRegisterDTO;
@@ -25,6 +28,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.channels.AcceptPendingException;
 import java.util.*;
 
 @Service
@@ -43,64 +47,56 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Boolean register(UserRegisterDTO userRegisterDTO) {
-        try{
-            Optional<UserEntity> optionalUsername = userRepository.findByUsername(userRegisterDTO.getUsername());
-            if(optionalUsername.isPresent()) {
-                return false;
-            }
-            Optional<UserEntity> optionalEmail = userRepository.findByEmail(userRegisterDTO.getEmail());
-            if(optionalEmail.isPresent()) {
-                return false;
-            }
-            Optional<RoleEntity> optionalRole = roleRepository.findById(2L);
-            if(optionalRole.isEmpty()) {
-                return false;
-            }
-            RoleEntity role = optionalRole.get();
-
-            UserEntity userEntity = UserEntity.builder()
-                    .username(userRegisterDTO.getUsername())
-                    .email(userRegisterDTO.getEmail())
-                    .password(passwordEncoder.encode(userRegisterDTO.getPassword()))
-                    .firstName(userRegisterDTO.getFirstName())
-                    .lastName(userRegisterDTO.getLastName())
-                    .gender(userRegisterDTO.getGender())
-                    .roleEntity(role)
-                    .enabled(true)
-                    .build();
-            userRepository.save(userEntity);
-
-            send(userRegisterDTO.getEmail(), userEntity.getUsername(), ", Welcome!");
-            return true;
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return false;
+        Optional<UserEntity> optionalUsername = userRepository.findByUsername(userRegisterDTO.getUsername());
+        if(optionalUsername.isPresent()) {
+            throw new UserAlreadyExistsException("Username already exists");
         }
+        Optional<UserEntity> optionalEmail = userRepository.findByEmail(userRegisterDTO.getEmail());
+        if(optionalEmail.isPresent()) {
+            throw new UserAlreadyExistsException("Email already exists");
+        }
+        Optional<RoleEntity> optionalRole = roleRepository.findById(2L);
+        if(optionalRole.isEmpty()) {
+            throw new NotFoundException("Role not found");
+        }
+        RoleEntity role = optionalRole.get();
 
+        UserEntity userEntity = UserEntity.builder()
+                .username(userRegisterDTO.getUsername())
+                .email(userRegisterDTO.getEmail())
+                .password(passwordEncoder.encode(userRegisterDTO.getPassword()))
+                .firstName(userRegisterDTO.getFirstName())
+                .lastName(userRegisterDTO.getLastName())
+                .gender(userRegisterDTO.getGender())
+                .roleEntity(role)
+                .enabled(true)
+                .build();
+        userRepository.save(userEntity);
+
+        send(userRegisterDTO.getEmail(), userEntity.getUsername(), ", Welcome!");
+        return true;
     }
 
     @Override
     public String login(UserLoginDTO userLoginDTO) {
-        try{
-            Optional<UserEntity> optionalUsername = userRepository.findByUsername(userLoginDTO.getUsername());
-            if(optionalUsername.isEmpty()){
-                return null;
-            }
-            UserEntity userEntity = optionalUsername.get();
-            if(!passwordEncoder.matches(userLoginDTO.getPassword(), userEntity.getPassword()) || !userEntity.isEnabled()) {
-                return null;
-            }
-
-            UsernamePasswordAuthenticationToken authenticationToken =
-                    new UsernamePasswordAuthenticationToken(userLoginDTO.getUsername(), userLoginDTO.getPassword(), userEntity.getAuthorities());
-            authenticationManager.authenticate(authenticationToken);
-            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-
-            return tokenService.generateToken(userEntity);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return null;
+        Optional<UserEntity> optionalUsername = userRepository.findByUsername(userLoginDTO.getUsername());
+        if(optionalUsername.isEmpty()){
+            throw new NotFoundException("User not found");
         }
+        UserEntity userEntity = optionalUsername.get();
+        if(!passwordEncoder.matches(userLoginDTO.getPassword(), userEntity.getPassword())) {
+            throw new InvalidCredentialsException("Username or password is incorrect");
+        }
+        if(!userEntity.isEnabled()){
+            throw new AccountNotEnabledException("Account is not enabled");
+        }
+
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(userLoginDTO.getUsername(), userLoginDTO.getPassword(), userEntity.getAuthorities());
+        authenticationManager.authenticate(authenticationToken);
+        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+
+        return tokenService.generateToken(userEntity);
     }
 
     @Override
@@ -219,11 +215,11 @@ public class UserServiceImpl implements UserService {
     public boolean forgotPassword(String email) {
         Optional<UserEntity> optionalEmail = userRepository.findByEmail(email);
         if(optionalEmail.isEmpty()){
-            return false;
+            throw new NotFoundException("User not found");
         }
         UserEntity user = optionalEmail.get();
         if(!user.isEnabled()){
-            return false;
+            throw new AccountNotEnabledException("Account is not enabled");
         }
         String password = generateCode();
         user.setPassword(passwordEncoder.encode(password));

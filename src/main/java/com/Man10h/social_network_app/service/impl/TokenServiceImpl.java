@@ -1,5 +1,6 @@
 package com.Man10h.social_network_app.service.impl;
 
+import com.Man10h.social_network_app.exception.exceptions.GlobalException;
 import com.Man10h.social_network_app.model.entity.UserEntity;
 import com.Man10h.social_network_app.repository.UserRepository;
 import com.Man10h.social_network_app.service.TokenService;
@@ -53,7 +54,7 @@ public class TokenServiceImpl implements TokenService {
             signedJWT.sign(signer);
             return signedJWT.serialize();
         } catch (Exception e) {
-            return null;
+            throw new GlobalException(e.getMessage());
         }
     }
 
@@ -67,7 +68,7 @@ public class TokenServiceImpl implements TokenService {
             String userId = signedJWT.getJWTClaimsSet().getSubject();
             return signedJWT.getJWTClaimsSet().getSubject();
         } catch (Exception e) {
-            return null;
+            throw new GlobalException(e.getMessage());
         }
     }
 
@@ -78,7 +79,7 @@ public class TokenServiceImpl implements TokenService {
             SignedJWT signedJWT = SignedJWT.parse(token);
             return signedJWT.verify(verifier) && new Date().before(signedJWT.getJWTClaimsSet().getExpirationTime());
         } catch (Exception e) {
-            return false;
+            throw new GlobalException(e.getMessage());
         }
     }
 
@@ -97,7 +98,7 @@ public class TokenServiceImpl implements TokenService {
             if (idToken == null) throw new RuntimeException("Invalid token");
             return token.getPayload();
         } catch (Exception e) {
-            throw new RuntimeException("Google token verification failed");
+            throw new GlobalException(e.getMessage());
         }
     }
 

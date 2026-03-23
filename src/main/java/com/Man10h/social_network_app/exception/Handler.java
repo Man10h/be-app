@@ -1,15 +1,10 @@
 package com.Man10h.social_network_app.exception;
 
-import com.Man10h.social_network_app.exception.exceptions.GlobalException;
-import com.Man10h.social_network_app.exception.exceptions.NotFoundException;
-import com.Man10h.social_network_app.exception.exceptions.UnauthorizedException;
-import com.Man10h.social_network_app.exception.exceptions.UniqueConstraintException;
+import com.Man10h.social_network_app.exception.exceptions.*;
 import com.Man10h.social_network_app.model.dto.ErrorDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
@@ -55,4 +50,33 @@ public class Handler {
     }
 
 
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ErrorDTO> invalidCredentials(InvalidCredentialsException e) {
+        return ResponseEntity.ok(ErrorDTO.builder()
+                .message(e.getMessage())
+                .code(HttpStatus.BAD_REQUEST.value())
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .build()
+        );
+    }
+
+    @ExceptionHandler(AccountNotEnabledException.class)
+    public ResponseEntity<ErrorDTO> accountNotEnabled(AccountNotEnabledException e) {
+        return ResponseEntity.ok(ErrorDTO.builder()
+                .message(e.getMessage())
+                .code(HttpStatus.UNAUTHORIZED.value())
+                .error(HttpStatus.UNAUTHORIZED.getReasonPhrase())
+                .build()
+        );
+    }
+
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<ErrorDTO> userAlreadyExists(UserAlreadyExistsException e) {
+        return ResponseEntity.ok(ErrorDTO.builder()
+                .message(e.getMessage())
+                .code(HttpStatus.BAD_REQUEST.value())
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .build()
+        );
+    }
 }
