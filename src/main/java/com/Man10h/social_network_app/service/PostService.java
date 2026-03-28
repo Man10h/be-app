@@ -22,4 +22,5 @@ public interface PostService {
     public Page<PostResponse> getAllPosts(Pageable pageable);
     public Page<PostResponse> findPostByTitle(String title, Pageable pageable);
     public void deletePost(String id, UserEntity userEntity);
+
 }

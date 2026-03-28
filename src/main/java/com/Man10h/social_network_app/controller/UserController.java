@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -164,5 +165,20 @@ public class UserController {
                                              @PathVariable("id") Long id){
         reportService.deleteReportByUser(id, userEntity);
         return ResponseEntity.ok().build();
+    }
+
+
+    @GetMapping("/users/{id}")
+    @Operation(summary = "Get stranger's profile")
+    public ResponseEntity<UserResponse> getStrangerProfile(@PathVariable("id") String id){
+        return ResponseEntity.ok(userService.getProfile(id));
+    }
+
+    @GetMapping("/users/{id}/posts")
+    @Operation(summary = "Get stranger's posts")
+    public ResponseEntity<Page<PostResponse>> getStrangerPosts(@PathVariable("id") String id,
+                                                         @RequestParam(name = "page") int page,
+                                                         @RequestParam(name = "size") int size){
+        return ResponseEntity.ok(postService.getUserPosts(id, PageRequest.of(page, size)));
     }
 }
