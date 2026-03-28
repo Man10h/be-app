@@ -214,6 +214,7 @@ public class UserServiceImpl implements UserService {
                         .firstName(userEntity.getFirstName())
                         .lastName(userEntity.getLastName())
                         .gender(userEntity.getGender())
+                        .enabled(userEntity.isEnabled())
                         .build()
         );
     }
@@ -238,9 +239,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<UserResponse> findUsersByName(String name, Pageable pageable) {
+    public Page<UserResponse> findUsersByNameAndEnabled(String name, Boolean enabled, Pageable pageable) {
 
-        return userRepository.findUsersByName(name, pageable).map(userEntity ->
+        return userRepository.findUsersByNameAndEnabled(name, enabled, pageable).map(userEntity ->
                 UserResponse.builder()
                         .id(userEntity.getId())
                         .image(userEntity.getImageEntityList().isEmpty() ? null :
@@ -252,6 +253,7 @@ public class UserServiceImpl implements UserService {
                         .firstName(userEntity.getFirstName())
                         .lastName(userEntity.getLastName())
                         .gender(userEntity.getGender())
+                        .enabled(userEntity.isEnabled())
                         .build()
         );
     }

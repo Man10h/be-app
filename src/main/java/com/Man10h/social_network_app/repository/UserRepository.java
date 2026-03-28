@@ -39,7 +39,7 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
                u.username LIKE CONCAT('%', :name, '%') OR 
                u.firstName LIKE CONCAT('%', :name, '%') OR 
                u.lastName LIKE CONCAT('%', :name, '%'))
-        AND u.enabled = true AND r.id != 1
+        AND (:enabled IS NULL OR u.enabled = :enabled) AND r.id != 1
 """,
     countQuery = """
         SELECT COUNT(DISTINCT u) FROM UserEntity u
@@ -48,9 +48,11 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
                        u.username LIKE CONCAT('%', :name, '%') OR\s
                        u.firstName LIKE CONCAT('%', :name, '%') OR\s
                        u.lastName LIKE CONCAT('%', :name, '%'))
-                AND u.enabled = true AND r.id != 1
+                AND (:enabled IS NULL OR  u.enabled = :enabled) AND r.id != 1
 """)
-    Page<UserEntity> findUsersByName(@Param("name") String name, Pageable pageable);
+    Page<UserEntity> findUsersByNameAndEnabled(@Param("name") String name,
+                                     @Param("enabled") boolean enabled,
+                                     Pageable pageable);
 
 
 }

@@ -59,4 +59,9 @@ public class PostLikeServiceImpl implements PostLikeService {
             postRepository.save(postEntity);
         }
     }
+
+    @Override
+    public Boolean doUserLikedPost(String postId, UserEntity userEntity) {
+        return postLikeRepository.existsByPostEntity_IdAndUserEntity(postId, userEntity);
+    }
 }

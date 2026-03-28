@@ -139,7 +139,7 @@ public class UserController {
     public ResponseEntity<Page<UserResponse>> findUsers(@RequestParam(value = "name", required = false) String name,
                                                         @RequestParam(value = "page") int page,
                                                         @RequestParam(value = "size") int size){
-        return ResponseEntity.ok(userService.findUsersByName(name, PageRequest.of(page, size)));
+        return ResponseEntity.ok(userService.findUsersByNameAndEnabled(name, true, PageRequest.of(page, size)));
     }
 
     @GetMapping("/reports")
@@ -180,5 +180,12 @@ public class UserController {
                                                          @RequestParam(name = "page") int page,
                                                          @RequestParam(name = "size") int size){
         return ResponseEntity.ok(postService.getUserPosts(id, PageRequest.of(page, size)));
+    }
+
+    @GetMapping("/posts/{id}/user-like")
+    @Operation(summary = "Do user like this post")
+    public ResponseEntity<Boolean> doUserLike(@PathVariable("id") String id,
+                                              @AuthenticationPrincipal UserEntity userEntity){
+        return ResponseEntity.ok(postLikeService.doUserLikedPost(id, userEntity));
     }
 }

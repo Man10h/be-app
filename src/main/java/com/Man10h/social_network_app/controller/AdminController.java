@@ -106,7 +106,7 @@ public class AdminController {
             @RequestParam("size") int size
     ) {
         if (name != null && !name.isEmpty()) {
-            return ResponseEntity.ok(userService.findUsersByName(name, PageRequest.of(page, size)));
+            return ResponseEntity.ok(userService.findUsersByNameAndEnabled(name, null, PageRequest.of(page, size)));
         }
         return ResponseEntity.ok(userService.getAllUsers(PageRequest.of(page, size)));
     }

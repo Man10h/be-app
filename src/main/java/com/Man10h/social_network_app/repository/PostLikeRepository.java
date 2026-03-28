@@ -11,7 +11,7 @@ import java.util.Optional;
 @Repository
 public interface PostLikeRepository extends JpaRepository<PostLikeEntity, String> {
     void deleteByUserEntityAndPostEntity(UserEntity userEntity, PostEntity postEntity);
-
-
     Optional<PostLikeEntity> findByUserEntityAndPostEntity(UserEntity userEntity, PostEntity postEntity);
+
+    boolean existsByPostEntity_IdAndUserEntity(String postId, UserEntity userEntity);
 }

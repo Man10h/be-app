@@ -13,4 +13,5 @@ public class UserResponse {
     private String lastName;
     private String gender;
     private ImageResponse image;
+    private boolean enabled;
 }
