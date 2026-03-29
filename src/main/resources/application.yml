@@ -34,12 +34,11 @@ spring:
             required: true
 
 
-
 jwt:
   secret: IHog2o7M6EPmoJ4Y4WBiLbvbCJ+AnYe3C1VmUQdW4gg=
 
 frontend:
-  url: http://127.0.0.1:5500
+  url: http://localhost:8081
 
 cloudinary:
   api_key: 829565713471837

@@ -31,10 +31,9 @@ public interface PostRepository extends JpaRepository<PostEntity, String> {
 
     @Query(
             value = """
-    SELECT DISTINCT p FROM PostEntity p
+    SELECT p FROM PostEntity p
     LEFT JOIN FollowerEntity f 
-    ON f.followerId = p.userEntity.id 
-    WHERE f.userEntity.id = :id
+    ON f.followerId = p.userEntity.id AND f.userEntity.id = :id
     ORDER BY 
       CASE 
         WHEN f.followerId IS NOT NULL THEN 0 ELSE 1
