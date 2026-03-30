@@ -197,4 +197,12 @@ public class UserController {
                                                                     @RequestParam(name = "size") int size){
         return ResponseEntity.ok(notificationService.getAllNotifications(userEntity, PageRequest.of(page, size)));
     }
+
+    @PostMapping("/change-password")
+    @Operation(summary = "Users change password")
+    public ResponseEntity<?> changePassword(@AuthenticationPrincipal UserEntity userEntity,
+                                            @RequestBody UserChangePasswordRequest request){
+        userService.changePassword(userEntity, request);
+        return ResponseEntity.ok().build();
+    }
 }

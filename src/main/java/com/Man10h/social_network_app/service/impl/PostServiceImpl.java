@@ -43,11 +43,26 @@ public class PostServiceImpl implements PostService {
                     .build();
             imageResponseList.add(imageResponse);
         }
+        UserEntity userEntity = postEntity.getUserEntity();
+        UserResponse userResponse = UserResponse.builder()
+                .id(userEntity.getId())
+                .image(userEntity.getImageEntityList().isEmpty() ? null :
+                        ImageResponse.builder()
+                                .url(userEntity.getImageEntityList().getFirst().getUrl())
+                                .id(userEntity.getImageEntityList().getFirst().getId())
+                                .build()
+                )
+                .firstName(userEntity.getFirstName())
+                .lastName(userEntity.getLastName())
+                .gender(userEntity.getGender())
+                .enabled(userEntity.isEnabled())
+                .build();
         return PostResponse.builder()
                 .images(imageResponseList)
                 .title(postEntity.getTitle())
                 .content(postEntity.getContent())
                 .like(postEntity.getLikeCount())
+                .userResponse(userResponse)
                 .id(postEntity.getId())
                 .build();
     }

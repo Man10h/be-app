@@ -4,6 +4,7 @@ import com.Man10h.social_network_app.exception.exceptions.AccountNotEnabledExcep
 import com.Man10h.social_network_app.exception.exceptions.InvalidCredentialsException;
 import com.Man10h.social_network_app.exception.exceptions.NotFoundException;
 import com.Man10h.social_network_app.exception.exceptions.UserAlreadyExistsException;
+import com.Man10h.social_network_app.model.dto.UserChangePasswordRequest;
 import com.Man10h.social_network_app.model.dto.UserDTO;
 import com.Man10h.social_network_app.model.dto.UserLoginDTO;
 import com.Man10h.social_network_app.model.dto.UserRegisterDTO;
@@ -256,6 +257,15 @@ public class UserServiceImpl implements UserService {
                         .enabled(userEntity.isEnabled())
                         .build()
         );
+    }
+
+    @Transactional
+    public void changePassword(UserEntity userEntity, UserChangePasswordRequest request) {
+        if(!passwordEncoder.matches(request.oldPassword(), userEntity.getPassword())){
+            throw new InvalidCredentialsException("Old password does not match");
+        }
+        userEntity.setPassword(passwordEncoder.encode(request.newPassword()));
+        userRepository.save(userEntity);
     }
 
     public String generateCode(){

@@ -34,6 +34,7 @@ public class PostEntity {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @BatchSize(size = 10)
     private UserEntity userEntity;
 
     @OneToMany(mappedBy = "postEntity", cascade = {CascadeType.MERGE, CascadeType.PERSIST}, orphanRemoval = true)
