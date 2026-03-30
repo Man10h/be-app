@@ -13,6 +13,8 @@ import com.Man10h.social_network_app.repository.UserRepository;
 import com.Man10h.social_network_app.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -89,6 +91,22 @@ public class NotificationServiceImpl implements NotificationService {
             throw new NotFoundException("Follower not found");
         }
         createAndSend(currentUser, optionalFollower.get(), "followed you", followerId);
+    }
+
+    @Override
+    public Page<NotificationResponse> getAllNotifications(UserEntity userEntity, Pageable pageable) {
+        return notificationRepository.findByReceiver(userEntity, pageable)
+                .map(notificationEntity -> {
+                    return NotificationResponse.builder()
+                            .id(notificationEntity.getId())
+                            .targetId(notificationEntity.getTargetId())
+                            .createdAt(notificationEntity.getCreatedAt())
+                            .sender(notificationEntity.getSender().getUsername())
+                            .receiver(notificationEntity.getReceiver().getUsername())
+                            .content(notificationEntity.getContent())
+                            .createdAt(notificationEntity.getCreatedAt())
+                            .build();
+                });
     }
 
 

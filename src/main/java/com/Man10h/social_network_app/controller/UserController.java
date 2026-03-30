@@ -34,6 +34,7 @@ public class UserController {
     private final PostLikeService postLikeService;
     private final CommentService commentService;
     private final ReportService reportService;
+    private final NotificationService notificationService;
 
     @GetMapping("/profile")
     @Operation(summary = "Get user's profile", description = "Using Bearer Token")
@@ -187,5 +188,13 @@ public class UserController {
     public ResponseEntity<Boolean> doUserLike(@PathVariable("id") String id,
                                               @AuthenticationPrincipal UserEntity userEntity){
         return ResponseEntity.ok(postLikeService.doUserLikedPost(id, userEntity));
+    }
+
+    @GetMapping("/notifications")
+    @Operation(summary = "Get all user's notifications")
+    public ResponseEntity<Page<NotificationResponse>> getAllNotifications(@AuthenticationPrincipal UserEntity userEntity,
+                                                                    @RequestParam(name = "page") int page,
+                                                                    @RequestParam(name = "size") int size){
+        return ResponseEntity.ok(notificationService.getAllNotifications(userEntity, PageRequest.of(page, size)));
     }
 }

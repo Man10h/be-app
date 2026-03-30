@@ -38,7 +38,7 @@ public class SecurityFilterConfig {
                         request.requestMatchers("/api/v1/home**", "/api/v1/home/**",
                                         "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                                 .requestMatchers("/ws/**", "/ws").permitAll()
-                                .requestMatchers("/api/v1/user**", "/api/v1/user/**").hasRole("USER")
+                                .requestMatchers("/api/v1/user**", "/api/v1/user/**").hasAnyRole("USER", "ADMIN")
                                 .requestMatchers("/api/v1/admin/**", "/api/v1/admin**").hasRole("ADMIN")
                                 .anyRequest().authenticated()
                 )
