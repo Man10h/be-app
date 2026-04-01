@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ContentModerationRepository extends JpaRepository<ContentModerationEntity, String> {
     void deleteByContentTypeAndPostEntity(ContentType contentType, PostEntity postEntity);
-
+    void deleteByPostEntity(PostEntity postEntity);
 }

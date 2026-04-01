@@ -8,6 +8,7 @@ import com.Man10h.social_network_app.model.dto.PostUpdateDTO;
 import com.Man10h.social_network_app.model.entity.*;
 import com.Man10h.social_network_app.model.enums.ContentType;
 import com.Man10h.social_network_app.model.response.*;
+import com.Man10h.social_network_app.repository.CommentRepository;
 import com.Man10h.social_network_app.repository.ContentModerationRepository;
 import com.Man10h.social_network_app.repository.PostRepository;
 import com.Man10h.social_network_app.repository.UserRepository;
@@ -32,6 +33,7 @@ public class PostServiceImpl implements PostService {
     private final ImageService imageService;
     private final ContentModerationService contentModerationService;
     private final ContentModerationRepository contentModerationRepository;
+    private final CommentRepository commentRepository;
 
 
     public PostResponse convertPostToPostResponse(PostEntity postEntity) {
@@ -63,6 +65,7 @@ public class PostServiceImpl implements PostService {
                 .content(postEntity.getContent())
                 .like(postEntity.getLikeCount())
                 .userResponse(userResponse)
+                .warning(postEntity.getWarning())
                 .id(postEntity.getId())
                 .build();
     }
@@ -82,6 +85,7 @@ public class PostServiceImpl implements PostService {
                 .content(postDTO.getContent())
                 .commentEntityList(new ArrayList<>())
                 .userEntity(user)
+                .warning(false)
                 .build();
         postRepository.save(post);
         //
@@ -175,6 +179,7 @@ public class PostServiceImpl implements PostService {
                 .like(post.getLikeCount())
                 .id(post.getId())
                 .moderationResponseList(contentModerationResponseList)
+                .warning(post.getWarning())
                 .build();
     }
 
@@ -236,7 +241,9 @@ public class PostServiceImpl implements PostService {
         if(optionalPost.isEmpty()){
             throw new NotFoundException("Post not found");
         }
+        contentModerationRepository.deleteByPostEntity(optionalPost.get());
         imageService.deleteByPostEntity(optionalPost.get());
+        commentRepository.deleteByPostEntity(optionalPost.get());
         postRepository.deleteById(id);
     }
 
@@ -285,7 +292,15 @@ public class PostServiceImpl implements PostService {
         if(!postEntityList.contains(postEntity)){
             throw new UnauthorizedException("Account not authorized to delete this post");
         }
+        contentModerationRepository.deleteByPostEntity(optionalPost.get());
         imageService.deleteByPostEntity(optionalPost.get());
+        commentRepository.deleteByPostEntity(optionalPost.get());
         postRepository.deleteById(id);
+    }
+
+    @Override
+    public Page<PostResponse> getWarningPosts(Pageable pageable) {
+        return postRepository.findByWarning(true, pageable)
+                .map(this::convertPostToPostResponse);
     }
 }

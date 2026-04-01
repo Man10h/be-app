@@ -205,4 +205,11 @@ public class UserController {
         userService.changePassword(userEntity, request);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/notifications/{id}")
+    public ResponseEntity<?> readNotification(@AuthenticationPrincipal UserEntity userEntity,
+                                              @PathVariable String id){
+        notificationService.readNotification(id, userEntity);
+        return ResponseEntity.ok().build();
+    }
 }

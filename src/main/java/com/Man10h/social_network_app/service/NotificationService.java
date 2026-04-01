@@ -12,4 +12,5 @@ public interface NotificationService {
     public void commentPost(String postId, UserEntity currentUser);
     public void followUser(String followerId, UserEntity currentUser);
     public Page<NotificationResponse> getAllNotifications(UserEntity userEntity, Pageable pageable);
+    public void readNotification(String notificationId, UserEntity currentUser);
 }

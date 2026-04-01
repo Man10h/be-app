@@ -1,4 +1,4 @@
 --liquibase formatted sql
---changeset manh:1
+--changeset manh:2
 
-INSERT INTO ROLE(id, name) VALUES (1, 'ADMIN'), (2, 'USER');
+INSERT INTO role(id, name) VALUES (1, 'ADMIN'), (2, 'USER');

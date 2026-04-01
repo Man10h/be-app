@@ -34,6 +34,8 @@ public class ReportServiceImpl implements ReportService {
                 .id(reportEntity.getId())
                 .title(reportEntity.getTitle())
                 .content(reportEntity.getContent())
+                .postId(reportEntity.getPostEntity().getId())
+                .userId(reportEntity.getUserEntity().getId())
                 .build();
     }
 
@@ -50,6 +52,7 @@ public class ReportServiceImpl implements ReportService {
                     .title(reportDTO.getTitle())
                     .content(reportDTO.getContent())
                     .userEntity(userEntity)
+                    .postEntity(postEntity)
                     .build();
 
             reportRepository.save(reportEntity);

@@ -29,7 +29,7 @@ public class NotificationEntity {
     private String content;
 
     @Column(name = "is_read")
-    private boolean isRead = false;
+    private Boolean isRead;
 
     @Column(name = "created_at")
     private Date createdAt;

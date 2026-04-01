@@ -34,6 +34,6 @@ public class ContentModerationEntity {
     @JoinColumn(name = "post_id")
     private PostEntity postEntity;
 
-    @OneToMany(mappedBy = "contentModerationEntity", cascade = {CascadeType.MERGE, CascadeType.PERSIST}, orphanRemoval = true)
+    @OneToMany(mappedBy = "contentModerationEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ContentModerationResultEntity> contentModerationResultEntityList;
 }

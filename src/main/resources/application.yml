@@ -3,13 +3,13 @@ spring:
     name: social-network-app
 
   datasource:
-    username: root
-    password: Manh2004
-    url: jdbc:mysql://localhost:3306/social-network
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:Manh2004}
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/social-network}
 
   liquibase:
     change-log: classpath:/db/changelog/appchange-log.xml
-    liquibase-schema: social-network
+    liquibase-schema: ${SPRING_LIQUIBASE_SCHEMA:social-network}
 
   jpa:
     hibernate:
@@ -22,8 +22,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: nguyenmanhlc10@gmail.com
-    password: aaof rvju disf hati
+    username: ${SPRING_MAIL_USERNAME:nguyenmanhlc10@gmail.com}
+    password: ${SPRING_MAIL_PASSWORD:aaof rvju disf hati}
     protocol: smtp
     properties:
       mail:
@@ -35,16 +35,16 @@ spring:
 
 
 jwt:
-  secret: IHog2o7M6EPmoJ4Y4WBiLbvbCJ+AnYe3C1VmUQdW4gg=
+  secret: ${JWT_SECRET:IHog2o7M6EPmoJ4Y4WBiLbvbCJ+AnYe3C1VmUQdW4gg=}
 
-frontend:
-  url: http://localhost:8081
+#frontend:
+#  url: http://localhost:8081
 
 cloudinary:
-  api_key: 829565713471837
-  api_secret: oHpiWWc8qqRFZUkj-kBtXhsVcJ8
-  cloud_name: djuq2enmy
+  api_key: ${CLOUDINARY_KEY:829565713471837}
+  api_secret: ${CLOUDINARY_SECRET:oHpiWWc8qqRFZUkj-kBtXhsVcJ8}
+  cloud_name: ${CLOUDINARY_NAME:djuq2enmy}
 
 azure:
-  api_key: 9AmCriorbFDfgJSUEN4foN8uTELaxggb9KSafvABdGfRCbXu40ZqJQQJ99CBACqBBLyXJ3w3AAAHACOGoBIS
+  api_key: ${AZURE_KEY:9AmCriorbFDfgJSUEN4foN8uTELaxggb9KSafvABdGfRCbXu40ZqJQQJ99CBACqBBLyXJ3w3AAAHACOGoBIS}
   endpoint: https://be-app-content-safety.cognitiveservices.azure.com

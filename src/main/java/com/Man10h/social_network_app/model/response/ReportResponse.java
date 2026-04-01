@@ -11,4 +11,6 @@ public class ReportResponse {
     private Long id;
     private String title;
     private String content;
+    private String postId;
+    private String userId;
 }

@@ -37,7 +37,7 @@ public class FollowerServiceImpl implements FollowerService {
             throw new NotFoundException("User not found");
         }
 
-        Optional<FollowerEntity> optionalFollowerEntity = followerRepository.findById(followerId);
+        Optional<FollowerEntity> optionalFollowerEntity = followerRepository.findByUserEntity_IdAndFollowerId(userId, followerId);
         if(optionalFollowerEntity.isEmpty()){
             UserEntity userEntity = optionalUserEntity.get();
             FollowerEntity followerEntity = FollowerEntity.builder()

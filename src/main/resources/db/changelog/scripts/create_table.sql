@@ -34,6 +34,7 @@ CREATE TABLE post (
                       content TEXT,
                       like_count BIGINT,
                       create_date DATETIME,
+                      warning BOOLEAN,
                       user_id CHAR(36),
                       CONSTRAINT fk_post_user FOREIGN KEY (user_id) REFERENCES user(id)
 );
@@ -109,7 +110,7 @@ CREATE TABLE notification (
                               receiver_id CHAR(36),
                               sender_id CHAR(36),
                               content TEXT,
-                              is_read BOOLEAN DEFAULT FALSE,
+                              is_read BOOLEAN,
                               created_at DATETIME,
                               target_id CHAR(36),
                               CONSTRAINT fk_notification_receiver FOREIGN KEY (receiver_id) REFERENCES user(id),

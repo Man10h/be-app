@@ -70,4 +70,6 @@ public interface PostRepository extends JpaRepository<PostEntity, String> {
     WHERE p.id = :id
 """)
     Optional<PostEntity> getPostWithContentModeration(@Param("id") String id);
+
+    Page<PostEntity> findByWarning(Boolean warning, Pageable pageable);
 }

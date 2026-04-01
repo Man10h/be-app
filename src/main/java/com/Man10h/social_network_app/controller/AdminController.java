@@ -111,5 +111,9 @@ public class AdminController {
         return ResponseEntity.ok(userService.getAllUsers(PageRequest.of(page, size)));
     }
 
-
+    @GetMapping("/warning-posts")
+    public ResponseEntity<Page<PostResponse>> getWarningPosts( @RequestParam(value = "page", defaultValue = "0") int page,
+                                                               @RequestParam(value = "size", defaultValue = "10") int size){
+        return ResponseEntity.ok(postService.getWarningPosts(PageRequest.of(page, size)));
+    }
 }

@@ -1,5 +1,6 @@
 package com.Man10h.social_network_app.service.impl;
 
+import com.Man10h.social_network_app.exception.exceptions.GlobalException;
 import com.Man10h.social_network_app.exception.exceptions.NotFoundException;
 import com.Man10h.social_network_app.model.entity.FollowerEntity;
 import com.Man10h.social_network_app.model.entity.NotificationEntity;
@@ -43,6 +44,7 @@ public class NotificationServiceImpl implements NotificationService {
                     .content(content)
                     .createdAt(new Date())
                     .targetId(targetId)
+                    .isRead(false)
                     .build();
             notificationRepository.save(notificationEntity);
 
@@ -53,6 +55,7 @@ public class NotificationServiceImpl implements NotificationService {
                     .createdAt(notificationEntity.getCreatedAt())
                     .sender(sender.getUsername())
                     .receiver(receiver.getUsername())
+                    .isRead(notificationEntity.getIsRead())
                     .build();
             messagingTemplate.convertAndSendToUser(receiver.getUsername(), "/queue/notifications", notificationResponse);
         } catch (Exception e) {
@@ -105,8 +108,23 @@ public class NotificationServiceImpl implements NotificationService {
                             .receiver(notificationEntity.getReceiver().getUsername())
                             .content(notificationEntity.getContent())
                             .createdAt(notificationEntity.getCreatedAt())
+                            .isRead(notificationEntity.getIsRead())
                             .build();
                 });
+    }
+
+    @Transactional
+    public void readNotification(String notificationId, UserEntity currentUser) {
+        Optional<NotificationEntity> optional = notificationRepository.findById(notificationId);
+        if(optional.isEmpty()){
+            throw new NotFoundException("Notification not found");
+        }
+        NotificationEntity notification = optional.get();
+        if(!notification.getReceiver().getId().equals(currentUser.getId())){
+            throw new GlobalException("Not main users");
+        }
+        notification.setIsRead(true);
+        notificationRepository.save(notification);
     }
 
 

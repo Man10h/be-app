@@ -32,6 +32,9 @@ public class PostEntity {
     @Column(name = "create_date")
     private Date createDate;
 
+    @Column(name = "warning")
+    public Boolean warning;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     @BatchSize(size = 10)
