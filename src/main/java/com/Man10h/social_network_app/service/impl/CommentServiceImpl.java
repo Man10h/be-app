@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,6 +48,7 @@ public class CommentServiceImpl implements CommentService {
                 .userId(userEntity.getId())
                 .url(userEntity.getImageEntityList().isEmpty() ? null : userEntity.getImageEntityList().getFirst().getUrl())
                 .fullName(userEntity.getFirstName() + " " + userEntity.getLastName())
+                .createDate(new Date())
                 .postEntity(postEntity)
                 .build();
 
@@ -56,6 +58,7 @@ public class CommentServiceImpl implements CommentService {
         return CommentResponse.builder()
                 .id(commentEntity.getId())
                 .content(commentEntity.getContent())
+                .createDate(commentEntity.getCreateDate())
                 .userId(userEntity.getId())
                 .fullName(userEntity.getFirstName() + " " + userEntity.getLastName())
                 .url(userEntity.getImageEntityList().isEmpty() ? null : userEntity.getImageEntityList().getFirst().getUrl())

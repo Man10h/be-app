@@ -14,4 +14,5 @@ public interface PostLikeRepository extends JpaRepository<PostLikeEntity, String
     Optional<PostLikeEntity> findByUserEntityAndPostEntity(UserEntity userEntity, PostEntity postEntity);
 
     boolean existsByPostEntity_IdAndUserEntity(String postId, UserEntity userEntity);
+    void deleteByPostEntity(PostEntity postEntity);
 }

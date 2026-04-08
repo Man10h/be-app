@@ -8,10 +8,7 @@ import com.Man10h.social_network_app.model.dto.PostUpdateDTO;
 import com.Man10h.social_network_app.model.entity.*;
 import com.Man10h.social_network_app.model.enums.ContentType;
 import com.Man10h.social_network_app.model.response.*;
-import com.Man10h.social_network_app.repository.CommentRepository;
-import com.Man10h.social_network_app.repository.ContentModerationRepository;
-import com.Man10h.social_network_app.repository.PostRepository;
-import com.Man10h.social_network_app.repository.UserRepository;
+import com.Man10h.social_network_app.repository.*;
 import com.Man10h.social_network_app.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,6 +31,8 @@ public class PostServiceImpl implements PostService {
     private final ContentModerationService contentModerationService;
     private final ContentModerationRepository contentModerationRepository;
     private final CommentRepository commentRepository;
+    private final ReportRepository reportRepository;
+    private final PostLikeRepository postLikeRepository;
 
 
     public PostResponse convertPostToPostResponse(PostEntity postEntity) {
@@ -66,6 +65,7 @@ public class PostServiceImpl implements PostService {
                 .like(postEntity.getLikeCount())
                 .userResponse(userResponse)
                 .warning(postEntity.getWarning())
+                .createDate(postEntity.getCreateDate())
                 .id(postEntity.getId())
                 .build();
     }
@@ -86,6 +86,7 @@ public class PostServiceImpl implements PostService {
                 .commentEntityList(new ArrayList<>())
                 .userEntity(user)
                 .warning(false)
+                .createDate(new Date())
                 .build();
         postRepository.save(post);
         //
@@ -114,6 +115,7 @@ public class PostServiceImpl implements PostService {
                 .content(post.getContent())
                 .like(post.getLikeCount())
                 .images(imageResponseList)
+                .createDate(post.getCreateDate())
                 .build();
     }
 
@@ -143,6 +145,7 @@ public class PostServiceImpl implements PostService {
                     .fullName(commentEntity.getFullName())
                     .url(commentEntity.getUrl())
                     .userId(commentEntity.getUserId())
+                    .createDate(commentEntity.getCreateDate())
                     .build();
             commentResponseList.add(commentResponse);
         }
@@ -180,6 +183,7 @@ public class PostServiceImpl implements PostService {
                 .id(post.getId())
                 .moderationResponseList(contentModerationResponseList)
                 .warning(post.getWarning())
+                .createDate(post.getCreateDate())
                 .build();
     }
 
@@ -209,6 +213,7 @@ public class PostServiceImpl implements PostService {
                     .fullName(commentEntity.getFullName())
                     .url(commentEntity.getUrl())
                     .userId(commentEntity.getUserId())
+                    .createDate(commentEntity.getCreateDate())
                     .build();
             commentResponseList.add(commentResponse);
         }
@@ -220,6 +225,7 @@ public class PostServiceImpl implements PostService {
                 .commentResponseList(commentResponseList)
                 .like(post.getLikeCount())
                 .id(post.getId())
+                .createDate(post.getCreateDate())
                 .build();
     }
 
@@ -244,6 +250,9 @@ public class PostServiceImpl implements PostService {
         contentModerationRepository.deleteByPostEntity(optionalPost.get());
         imageService.deleteByPostEntity(optionalPost.get());
         commentRepository.deleteByPostEntity(optionalPost.get());
+        reportRepository.deleteByPostEntity(optionalPost.get());
+        postLikeRepository.deleteByPostEntity(optionalPost.get());
+
         postRepository.deleteById(id);
     }
 
@@ -295,6 +304,10 @@ public class PostServiceImpl implements PostService {
         contentModerationRepository.deleteByPostEntity(optionalPost.get());
         imageService.deleteByPostEntity(optionalPost.get());
         commentRepository.deleteByPostEntity(optionalPost.get());
+        reportRepository.deleteByPostEntity(postEntity);
+        postLikeRepository.deleteByPostEntity(postEntity);
+
+
         postRepository.deleteById(id);
     }
 

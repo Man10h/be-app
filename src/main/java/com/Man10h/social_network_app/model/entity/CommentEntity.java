@@ -2,6 +2,9 @@ package com.Man10h.social_network_app.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+
+import java.util.Date;
 
 @Entity
 @Table(name = "comment")
@@ -26,6 +29,10 @@ public class CommentEntity {
 
     @Column(name = "content")
     private String content;
+
+    @Column(name = "create_date")
+    @CreatedDate
+    private Date createDate;
 
     @ManyToOne
     @JoinColumn(name = "post_id")

@@ -53,4 +53,7 @@ public class PostEntity {
 
     @OneToMany(mappedBy = "postEntity", cascade = {CascadeType.MERGE, CascadeType.PERSIST}, orphanRemoval = true)
     private Set<ContentModerationEntity> contentModerationEntityList;
+
+    @OneToMany(mappedBy = "postEntity", cascade = {CascadeType.MERGE, CascadeType.PERSIST}, orphanRemoval = true)
+    private List<PostLikeEntity> postLikeEntityList;
 }

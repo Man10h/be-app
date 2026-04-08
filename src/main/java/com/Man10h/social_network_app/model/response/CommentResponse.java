@@ -1,7 +1,9 @@
 package com.Man10h.social_network_app.model.response;
 
-import jakarta.persistence.Column;
+
 import lombok.*;
+
+import java.util.Date;
 
 @Getter
 @Setter
@@ -14,4 +16,5 @@ public class CommentResponse {
     private String fullName;
     private String url;
     private String content;
+    private Date createDate;
 }

@@ -26,4 +26,6 @@ public interface ReportRepository extends JpaRepository<ReportEntity, Long> {
     Page<ReportEntity> findByPostEntity_Id(String postId, Pageable pageable);
 
     List<ReportEntity> findByUserEntity(UserEntity userEntity);
+
+    void deleteByPostEntity(PostEntity postEntity);
 }
